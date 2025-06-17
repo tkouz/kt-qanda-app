@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # nginxというサービス
+  nginx:
+    # コンテナ名指定
+    container_name: curriculum-nginx
+    # 使用イメージの指定
+    image: nginx:latest
+    # 同期ファイルの指定
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ../:/var/www/html # ★修正点：アプリケーションルートを親ディレクトリに
+    # 使用ポートの指定
+    ports:
+      - "80:80"
+    # 依存関係の指定 (指定したコンテナより後に立ち上がる)
+    depends_on:
+      - php
+
+  php:
+    container_name: curriculum-laravel
+    ###############################################################
+    # Mac M1チップユーザーは以下のコメントアウトを解除して作業を進めてください
+    # platform: linux/x86_64
+    ###############################################################
+    
+    # どれを使ってビルド(コンテナ立ち上げを行うか)
+    build:
+      # ディレクトリの指定
+      context: ../ # ★修正点：ビルドコンテキストを親ディレクトリに (Laravelプロジェクトルート)
+      # 使用するDockerfile名の指定
+      dockerfile: docker-env/docker/php/Dockerfile # ★修正点：contextからの相対パスに
+    volumes:
+      - ../:/var/www/html # ★修正点：アプリケーションルートを親ディレクトリに
+      - ./docker/php/check_startup.sh:/tmp/check_startup.sh
+    # サーバーに対してオープンするポートを指定
+    expose:
+      - "9000"
+    depends_on:
+      - db
+
+  db:
+    container_name: curriculum-db
+    image: mysql:5.7
+    # コンテナの環境変数を指定
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - ./db:/var/lib/mysql # このままでOKです。
+    restart: always
+    ports:
+      - 3306:3306
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: docker-env-phpMyAdmin-1 # あなたのdocker-compose.ymlに合わせて確認
+    environment:
+      PMA_HOST: db # MySQLサービス名に合わせる
+      MYSQL_ROOT_PASSWORD: root # dbサービスで設定したrootパスワードに合わせる
+    ports:
+      - "4040:80" # 重複していたポート指定を一つにまとめる
+    depends_on:
+      - db
+    volumes:
+      # ここにセッションディレクトリのマウントを追加し、chmodでパーミッションを設定
+      - pma_sessions:/sessions # 新しく追加するボリューム (上部のvolumes定義を参照)
+      # - ./phpmyadmin/sessions:/sessions # こちらは削除またはコメントアウト。pma_sessions ボリュームを使う
+    # 新しく追加するコマンド
+    command: sh -c "chmod 777 /sessions && /docker-entrypoint.sh apache2-foreground"
+    # links: # 非推奨のため削除
+    #   - db
+
+# 最後に volumes 定義を追加 (phpmyadminのセッション用)
+volumes:
+  db_data: # dbサービスがvolumesでdb_dataを指定している場合。もし指定していなければ不要
+  pma_sessions: # phpmyadminのセッション用ボリューム
