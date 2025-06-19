@@ -45,6 +45,7 @@ services:
     image: mysql:5.7
     # コンテナの環境変数を指定
     environment:
+      MYSQL_DATABASE: laravel
       MYSQL_ROOT_PASSWORD: root
       TZ: 'Asia/Tokyo'
     volumes:

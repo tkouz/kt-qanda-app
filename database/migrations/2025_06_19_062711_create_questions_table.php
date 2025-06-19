@@ -31,10 +31,7 @@ return new class extends Migration
             $table->timestamp('posted_at')->useCurrent()->comment('投稿日時');
 
             // 更新日時
-            // 論理名: 更新日時, 物理名: updated_at, データ型: DATETIME, Not Null: ●, デフォルト値: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate()->comment('更新日時');
-
-            // ユーザーID (外部キー)
+           // ユーザーID (外部キー)
             // 論理名: ユーザーID, 物理名: user_id, データ型: INT, Not Null: ●
             // users テーブルの id を参照する外部キー制約を設定します。
             $table->foreignId('user_id')

@@ -21,11 +21,28 @@ Route::get('/', function () {
 // 質問一覧表示のルート
 Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
 
-// ★ここから追加★
+// ★ここが重要★
+// 質問投稿フォーム表示のルート (より具体的なので先に定義)
+Route::get('/questions/create', [QuestionController::class, 'create'])->name('questions.create');
 
-// 質問詳細表示のルート
-// /questions/{question} へのGETリクエストを QuestionController の show メソッドで処理する
-// {question} はワイルドカードで、URLのこの部分が QuestionモデルのIDとして扱われる
+// 質問詳細表示のルート (ワイルドカードを含むので後に定義)
 Route::get('/questions/{question}', [QuestionController::class, 'show'])->name('questions.show');
 
-// ★ここまで追加★
+// 質問を保存するルート
+// /questions へのPOSTリクエストを QuestionController の store メソッドで処理する
+Route::post('/questions', [QuestionController::class, 'store'])->name('questions.store');
+
+// sanctumやstorageなどの他のルートも元に戻す
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
+Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show'])
+    ->middleware('web')
+    ->name('sanctum.csrf-cookie');
+
+use Illuminate\Support\Facades\Storage;
+Route::get('storage/{path}', function ($path) {
+    return Storage::response($path);
+})->where('path', '.*')->name('storage.local');
+
+Route::get('/up', function () {
+    return response('ok');
+});
