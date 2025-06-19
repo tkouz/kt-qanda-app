@@ -39,13 +39,13 @@
 
         @forelse ($questions as $question)
             <div class="question-item">
-                <h2>{{ $question->title }}</h2>
-                <p>{{ Str::limit($question->content, 150) }}</p> {{-- 質問本文を150文字に制限して表示 --}}
-                <div class="question-meta">
-                    投稿者: {{ $question->user->username }} (ID: {{ $question->user->id }}) <br>
-                    投稿日時: {{ $question->posted_at->format('Y/m/d H:i') }}
-                </div>
-            </div>
+              <h2><a href="{{ route('questions.show', $question->id) }}">{{ $question->title }}</a></h2>
+              <p>{{ Str::limit($question->content, 150) }}</p>
+              <div class="question-meta">
+                      投稿者: {{ $question->user->username }} (ID: {{ $question->user->id }}) <br>
+                      投稿日時: {{ $question->posted_at->format('Y/m/d H:i') }}
+              </div>
+           </div>
         @empty
             <p>まだ質問がありません。</p>
         @endforelse
