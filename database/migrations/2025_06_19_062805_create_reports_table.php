@@ -14,46 +14,38 @@ return new class extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->id(); // id INT AUTO_INCREMENT PRIMARY KEY
 
-            // 報告対象タイプ
-            // 論理名: 報告対象タイプ, 物理名: reported_object_type, データ型: ENUM('question','answer'), Not Null: ●
-            $table->enum('reported_object_type', ['question', 'answer'])->comment('報告対象タイプ');
+            // 報告対象オブジェクトタイプ (ポリモーフィックリレーションシップの型)
+            // 論理名: 報告対象オブジェクトタイプ, 物理名: reported_object_type, データ型: VARCHAR(512), Not Null: ●
+            // クラス名が長くなる可能性があるので、VARCHAR(512) に変更します。
+            $table->string('reported_object_type', 512)->comment('報告対象オブジェクトタイプ');
 
-            // 報告対象ID
-            // 論理名: 報告対象ID, 物理名: reported_object_id, データ型: INT, Not Null: ●
-            // このカラムは、reported_object_type に応じて questions.id または answers.id を保持します。
-            // データベースレベルでの直接的な外部キー制約は設定しません。（ポリモーフィックリレーションで対応）
-            $table->unsignedBigInteger('reported_object_id')->comment('報告対象ID');
+            // 報告対象オブジェクトID (ポリモーフィックリレーションシップのID)
+            // 論理名: 報告対象オブジェクトID, 物理名: reported_object_id, データ型: INT, Not Null: ●
+            $table->unsignedBigInteger('reported_object_id')->comment('報告対象オブジェクトID');
 
-            // 報告者ユーザーID (外部キー)
+            // 報告者ユーザーID
             // 論理名: 報告者ユーザーID, 物理名: reporter_user_id, データ型: INT, Not Null: ●
             // users テーブルの id を参照する外部キー制約を設定します。
             $table->foreignId('reporter_user_id')
-                  ->constrained('users') // 'users' テーブルの 'id' カラムを参照
-                  ->onDelete('cascade')  // 関連するユーザーが削除されたら報告も削除 (任意, 必要に応じて変更)
+                  ->constrained('users')
+                  ->onDelete('cascade') // 報告者が削除されたら報告も削除
                   ->comment('報告者ユーザーID');
 
             // 報告理由
             // 論理名: 報告理由, 物理名: report_reason, データ型: VARCHAR(255), Not Null: ●
-            // 選択式とのことなので、具体的な理由をアプリケーション側で管理するか、enum型にするか検討が必要です。
-            // ここでは汎用的にVARCHAR(255)としています。
-            $table->string('report_reason', 255)->comment('報告理由');
+            $table->string('report_reason', 255)->comment('報告理由'); // これが正しいカラム名
 
-            // 報告コメント
-            // 論理名: 報告コメント, 物理名: report_comment, データ型: TEXT, Not Null: - (NULL許容)
+            // 報告コメント (nullable)
+            // 論理名: 報告コメント, 物理名: report_comment, データ型: TEXT, Not Null: -
             $table->text('report_comment')->nullable()->comment('報告コメント');
 
-            // 報告日時
-            // 論理名: 報告日時, 物理名: posted_at, データ型: DATETIME, Not Null: ●, デフォルト値: CURRENT_TIMESTAMP
-            $table->timestamp('posted_at')->useCurrent()->comment('報告日時');
+            // 投稿日時
+            // 論理名: 投稿日時, 物理名: posted_at, データ型: DATETIME, Not Null: ●, デフォルト値: CURRENT_TIMESTAMP
+            $table->timestamp('posted_at')->useCurrent()->comment('投稿日時');
 
-            // 処理済フラグ
-            // 論理名: 処理済フラグ, 物理名: is_handled, データ型: BOOLEAN, Not Null: ●, デフォルト値: FALSE
-            $table->boolean('is_handled')->default(false)->comment('処理済フラグ');
-
-            // 報告対象の質問または回答のIDとタイプを組み合わせたユニークインデックス (任意: 重複報告防止)
-            // これにより、同じユーザーが同じオブジェクトに複数回違反報告するのを防ぐことができます。
-            // 必要なければ削除しても構いません。
-            // $table->unique(['reported_object_type', 'reported_object_id', 'reporter_user_id'], 'unique_report');
+            // 処理済みフラグ
+            // 論理名: 処理済みフラグ, 物理名: is_handled, データ型: BOOLEAN, Not Null: ●, デフォルト値: FALSE
+            $table->boolean('is_handled')->default(false)->comment('処理済みフラグ');
         });
     }
 

@@ -14,20 +14,17 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id(); // id INT AUTO_INCREMENT PRIMARY KEY
 
-            // タイトル
-            // 論理名: タイトル, 物理名: title, データ型: VARCHAR(255), Not Null: ●
-            $table->string('title', 255)->comment('タイトル');
+            // 質問タイトル
+            // 論理名: 質問タイトル, 物理名: title, データ型: VARCHAR(255), Not Null: ●
+            $table->string('title', 255)->comment('質問タイトル');
 
-            // 質問内容
-            // 論理名: 質問内容, 物理名: content, データ型: TEXT, Not Null: ●
-            $table->text('content')->comment('質問内容');
+            // 質問本文
+            // 論理名: 質問本文, 物理名: content, データ型: TEXT, Not Null: ●
+            $table->text('content')->comment('質問本文');
 
             // 画像パス
-            // 論理名: 画像パス, 物理名: image_path, データ型: VARCHAR(255), Not Null: ●
-            // 要件定義書では質問投稿時「画像添付（必須）」となっていますが、画像が不要な質問を許容する場合もあります。
-            // もし画像添付が「任意」に変更される可能性がある場合は、`->nullable()` を追加してください。
-            // 現在は定義書通り「必須」としています。
-            $table->string('image_path', 255)->comment('画像パス');
+            // 論理名: 画像パス, 物理名: image_path, データ型: VARCHAR(255), Not Null: -
+            $table->string('image_path', 255)->nullable()->comment('画像パス'); // ここがnullable()になっているか確認！
 
             // 投稿日時
             // 論理名: 投稿日時, 物理名: posted_at, データ型: DATETIME, Not Null: ●, デフォルト値: CURRENT_TIMESTAMP
@@ -42,7 +39,7 @@ return new class extends Migration
             // users テーブルの id を参照する外部キー制約を設定します。
             $table->foreignId('user_id')
                   ->constrained('users') // 'users' テーブルの 'id' カラムを参照
-                  ->onDelete('cascade')   // 関連するユーザーが削除されたら質問も削除 (任意, 必要に応じて変更)
+                  ->onDelete('cascade')  // 関連するユーザーが削除されたら質問も削除 (任意, 必要に応じて変更)
                   ->comment('ユーザーID');
 
             // 表示フラグ
