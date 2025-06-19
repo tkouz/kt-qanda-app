@@ -24,11 +24,19 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            // 'name' => fake()->name(), // この行はコメントアウトまたは削除
+            'username' => fake()->userName(), // 'username' を追加し、fake()->userName() を使用
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // 追加したカラムのテストデータ生成
+            'profile_image' => null, // または fake()->imageUrl() など、必要に応じてダミーデータを生成
+            'self_introduction' => fake()->paragraph(),
+            'last_login_at' => fake()->dateTimeThisYear(),
+            'registered_at' => now(),
+            'role' => fake()->randomElement(['general', 'admin']),
+            'is_active' => true,
         ];
     }
 
