@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\QuestionController; // ★この行を追加★
+use App\Http\Controllers\QuestionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,10 +18,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// 質問一覧表示のルート
+Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
+
 // ★ここから追加★
 
-// 質問一覧表示のルート
-// /questions へのGETリクエストを QuestionController の index メソッドで処理する
-Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
+// 質問詳細表示のルート
+// /questions/{question} へのGETリクエストを QuestionController の show メソッドで処理する
+// {question} はワイルドカードで、URLのこの部分が QuestionモデルのIDとして扱われる
+Route::get('/questions/{question}', [QuestionController::class, 'show'])->name('questions.show');
 
 // ★ここまで追加★

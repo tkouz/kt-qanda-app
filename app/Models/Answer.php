@@ -4,53 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Question; // ★この行を追加★
+use App\Models\User;     // ★この行を追加★
+use App\Models\Comment;  // ★この行を追加★
+use Carbon\Carbon;
 
 class Answer extends Model
 {
     use HasFactory;
 
-    // テーブル名を指定
-    protected $table = 'answers';
-
-    // タイムスタンプカラムの自動管理を無効にする
-    public $timestamps = false;
-
-    // Mass Assignment（一括代入）で代入を許可するカラムを指定
-    protected $fillable = [
-        'question_id',
-        'content',
-        'image_path',
-        'posted_at',
-        'updated_at',
-        'user_id',
-        'is_visible',
+    protected $casts = [
+        'posted_at' => 'datetime', // ★この行を追加★
     ];
 
-    // questionに対するリレーション (一対多の逆)
-    // 回答は一つの質問に属する
-    public function question()
+    /**
+     * 回答が属する質問を取得 (belongsTo: 一つの回答は一つの質問に属する)
+     */
+    public function question() // ★このメソッドを追加★
     {
         return $this->belongsTo(Question::class);
     }
 
-    // userに対するリレーション (一対多の逆)
-    // 回答は一つのユーザーに属する
-    public function user()
+    /**
+     * 回答に紐づくユーザーを取得 (belongsTo: 一つの回答は一つのユーザーに属する)
+     */
+    public function user() // ★このメソッドを追加★
     {
         return $this->belongsTo(User::class);
     }
 
-    // commentsに対するリレーション (一対多)
-    // 回答は複数のコメントを持つ
-    public function comments()
+    /**
+     * 回答に紐づくコメントを複数取得 (hasMany: 一つの回答は複数のコメントを持つ)
+     */
+    public function comments() // ★このメソッドを追加★
     {
         return $this->hasMany(Comment::class);
-    }
-
-    // reportsに対するリレーション (ポリモーフィックリレーションの準備)
-    // 回答は複数の報告を持つ可能性がある
-    public function reports()
-    {
-        return $this->morphMany(Report::class, 'reportable');
     }
 }
